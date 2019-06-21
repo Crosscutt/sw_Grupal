@@ -137,9 +137,10 @@ export default class LoginUI extends Component {
   }
   async getToken() {
     let fcmToken = await AsyncStorage.getItem("fcmToken");
+    this.setState({token:fcmToken});
     if (!fcmToken) {
       fcmToken = await firebase.messaging().getToken();
-      this.setState({token:fcmToken});
+      
       if (fcmToken) {
         // user has a device token
         await AsyncStorage.setItem("fcmToken", fcmToken);
@@ -166,7 +167,6 @@ export default class LoginUI extends Component {
    * se debería mostrar un error.
    */
   iniciarSesion() {
-    console.warn(this.state.token)
     axios.post(Url + 'loginu', {
       username: this.state.username,
       password: this.state.password,

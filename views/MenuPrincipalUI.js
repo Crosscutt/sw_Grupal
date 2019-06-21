@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Header, Content, Footer, FooterTab, Button, Icon, Badge, Card, Text, Body, CardItem, Right, Left } from 'native-base';
 import axios from 'axios';
+import Modal from 'react-native-modal'
 import Url from './url';
 import {
   StyleSheet,
@@ -11,8 +12,9 @@ import {
   Picker,
   TextInput
 } from 'react-native';
-import firebase from "react-native-firebase";
-
+import firebase from 'react-native-firebase';
+import AsyncStorage from '@react-native-community/async-storage';
+  
 
 const { height, width } = Dimensions.get('window')
 
@@ -35,13 +37,12 @@ export default class MenuPrincipalUI extends Component {
       Producto: []
     };
   }
-  componentDidMount(){
-    this.createNotificationListeners();
-  }
+  
   componentWillMount() {
-    //this.notificationListener();
+    this.createNotificationListeners();
+    this.notificationListener();
     this.notificationOpenedListener();
-    this.messageListener();
+
     const { navigation } = this.props;
     const itemID = navigation.getParam('itemID');
 
@@ -50,67 +51,78 @@ export default class MenuPrincipalUI extends Component {
         this.setState({ Datos: response.data, idCliente: itemID.cliente_id })
       })
   }
-  AbrirModal(id) {
-    this.setState({ marcado: !this.state.marcado, idSuscripcion: id })
-  }
 
   async createNotificationListeners() {
-    /*
-     * Triggered when a particular notification has been received in foreground
-     * */
-
-
-    /*
-     // eslint-disable-next-line max-len
-     // eslint-disable-next-line max-len
-     * If your app is in background, you can listen for when a notification is clicked / tapped / opened as follows:
-     * */
-    this.notificationOpenedListener = firebase
-      .notifications()
-      .onNotificationOpened(notificationOpen => {
-        this.setState({
-          latSucursal: notificationOpen.notification.data.latitud,
-          lngSucursal: notificationOpen.notification.data.longitud
-        });
-        this.showAlert('Solicitud: Tienes un nuevo trabajo', 'No olvides de marcar tu asistencia');
-      });
-
-      /* console.warn(notificationOpen.notification.data);
-        console.warn(notificationOpen.notification.body);
-        this.setState({
-          latClient: notificationOpen.data.latitud,
-          lngClient: notificationOpen.data.longitud,
-          idServicio: notificationOpen.data.id
-        }); */
-    /*
-     * If your app is closed, you can check if it was opened by a notification being clicked / tapped / opened as follows:
-     * */
-    const notificationOpen = await firebase
-      .notifications()
-      .getInitialNotification();
-      console.log('AQUI constante');
+ 
+    this.notificationListener = firebase.notifications().onNotification((notification) => {
+        const { title, body } = notification;
+        console.warn(notification);
+        this.showAlert(title, body);
+    });
+  
+  
+    this.notificationOpenedListener = firebase.notifications().onNotificationOpened((notificationOpen) => {
+        const { title, body } = notificationOpen.notification;
+        console.warn(notificationOpen.notification);
+        this.showAlert(title, body);
+    });
+  
+    const notificationOpen = await firebase.notifications().getInitialNotification();
     if (notificationOpen) {
-      console.log('Dentro del If constante');
-      const { title, body } = notificationOpen.notification;
-      this.showAlert(title, body);
+        const { title, body } = notificationOpen.notification;
+        console.warn(notificationOpen.notification);
+        this.showAlert(title, body);
+        
     }
-    /*
-     * Triggered for data only payload in foreground
-     * */
-    this.messageListener = firebase.messaging().onMessage(message => {
-      //process data message
-      //this.setState = { mensaje: message.getData() };
-      this.showAlert("hola", this.state);
+    this.messageListener = firebase.messaging().onMessage((message) => {
+      console.log(JSON.stringify(message));
     });
   }
   showAlert(title, body) {
     Alert.alert(
-      title,
-      body,
-      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
-      { cancelable: false }
+      title, body,
+      [
+          { text: 'OK', onPress: () => console.log('OK Pressed') },
+      ],
+      { cancelable: false },
     );
   }
+  
+    //1
+  async checkPermission() {
+    const enabled = await firebase.messaging().hasPermission();
+    if (enabled) {
+        this.getToken();
+    } else {
+        this.requestPermission();
+    }
+  }
+  
+    //3
+  async getToken() {
+    let fcmToken = await AsyncStorage.getItem('fcmToken');
+    this.setState({token:fcmToken,yaMande:true})
+    if (!fcmToken) {
+        fcmToken = await firebase.messaging().getToken();
+        if (fcmToken) {
+            await AsyncStorage.setItem('fcmToken', fcmToken);
+        }
+    }
+  }
+   //2
+async requestPermission() {
+  try {
+      await firebase.messaging().requestPermission();
+      this.getToken();
+  } catch (error) {
+      console.log('permission rejected');
+  }
+}
+  AbrirModal(id) {
+    this.setState({ marcado: !this.state.marcado, idSuscripcion: id })
+  }
+
+
   buscar() {
     this.setState({ bandera: !this.state.bandera });
     this.props.navigation.navigate('ListarEmpresasUI', { idCliente: this.state.idCliente });
@@ -135,14 +147,15 @@ export default class MenuPrincipalUI extends Component {
           </Text>
 
             <View style={{ marginTop: 10, paddingHorizontal: 20 }}>
-              <Text style={{ fontWeight: '100', marginTop: 10 }}>
-                Puede hacer su reserva ahora mismo que esta esperando
+              <CardItem>
+                <Text style={{ fontWeight: '100', marginTop: 10 }}>
+                  Puede hacer su reserva ahora mismo que esta esperando
                </Text>
-
+              </CardItem>
               {this.state.Datos.map(dato => {
                 return (
-                  <View key={dato[0].id_empresa}>
-                    <CardItem >
+                  <View key={dato[0].id_empresa} style={{ borderWidth: 0.5, marginTop: 15, height: 300, borderRadius: 10 }}>
+                    <CardItem  >
                       <Left>
                         <Image style={styles.imagen_logo} source={{ uri: dato[0].foto_empresa }} />
                         <Body>
@@ -159,10 +172,10 @@ export default class MenuPrincipalUI extends Component {
                       >
                         {this.cargarP(Object.keys(dato).length, dato).map(piv => {
                           return (
-                            <View key={piv!=undefined?piv.id_oferta:-1}>
+                            <View key={piv != undefined ? piv.id_oferta : -1}>
                               {piv != undefined ?
                                 <View >
-                                  <View style={{ height: 170, width: 200, marginLeft: 20, borderWidth: 0.5, borderColor: '#ddddd' }}  >
+                                  <View style={{ height: 170, width: 200, marginLeft: 20, borderWidth: 0.4, borderRadius: 10, borderColor: '#ddddd' }}  >
                                     <View style={{ flex: 2 }}>
                                       <Image
                                         source={{ uri: piv.foto_producto }}
@@ -190,7 +203,9 @@ export default class MenuPrincipalUI extends Component {
             </View>
           </View>
         </ScrollView>
+        <Text>
 
+        </Text>
         <Content />
         <Footer>
           <FooterTab>

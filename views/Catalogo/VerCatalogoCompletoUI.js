@@ -5,6 +5,9 @@ import axios from 'axios'
 
 export default class VerCatalogoCompletoUI extends Component {
 
+  static navigationOptions = {
+    title: 'Productos Pertenecientes'
+  }
   constructor(props) {
     super(props);
     this.state = {
@@ -28,7 +31,6 @@ export default class VerCatalogoCompletoUI extends Component {
     axios.get('http://192.168.0.107:8000/api/products/' + itemId)
       .then(response => {
         this.setState({ Datos: response.data, isFetching: false })
-        console.warn(response.data)
       });
 
   }
