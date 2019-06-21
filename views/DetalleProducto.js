@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { Container, Header, Content, Card, CardItem, Text, Button, Left, Body, Right, Icon } from 'native-base';
-
+import axios from 'axios'
 const styles = StyleSheet.create({
   imagen: {
     width: '100%',
@@ -27,25 +27,25 @@ const styles = StyleSheet.create({
 const pv = 5;
 
 export default class DetalleProducto extends Component {
-    static navigationOptions = {
-        title: 'ReserveIt'
-      }
+  static navigationOptions = {
+    title: 'ReserveIt'
+  }
   constructor(props) {
     super(props);
     this.state = {
-      Nombre:"",
-      Descripcion:"",  
-      Foto:"",
-      Precio:0,
+      Nombre: "",
+      Descripcion: "",
+      Foto: "",
+      Precio: 0,
       Cantidad: 0,
       Total: 0
     }
   }
 
-  componentWillMount(){
+  componentWillMount() {
     const { navigation } = this.props;
     const itemID = navigation.getParam('itemID');
-    this.setState({Nombre:itemID.nombre,Descripcion:itemID.descripcion,Foto:itemID.foto,Precio:itemID.precio})
+    this.setState({ Nombre: itemID.nombre, Descripcion: itemID.descripcion, Foto: itemID.foto, Precio: itemID.precio })
   }
 
   contador(cant) {
@@ -58,6 +58,23 @@ export default class DetalleProducto extends Component {
       }
     }
 
+  }
+
+  Reservar(){
+    axios.post(`http://25793a06.ngrok.io/api/reserva/create`, {
+      idCliente:1,
+      idSucursal:2,
+      Monto:this.state.Total,
+      Cantidad:this.state.Cantidad,
+      producto:1
+    })
+    .then((response)=> {
+      console.warn(response.data)
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+    this.setState({yala:true})
   }
   render() {
     return (
@@ -98,7 +115,7 @@ export default class DetalleProducto extends Component {
                 <Text style={styles.total}>Total : {this.state.Total} Bs.</Text>
               </Body>
             </CardItem>
-            <Button block success>
+            <Button block success onPress={()=>this.Reservar()}>
               <Text>Reservar Ahora</Text>
             </Button>
           </Card>

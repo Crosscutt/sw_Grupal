@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import { Container, Header, Content, Footer, FooterTab, Button, Icon, Badge, Card, Text, Body, CardItem } from 'native-base';
+import { Container, Header, Content, Footer, FooterTab, Button, Icon, Badge, Card, Text, Body, CardItem, Right } from 'native-base';
 import ListarEmpresasUI from './Catalogo/ListarEmpresasUI';
 import axios from 'axios';
+import Modal from 'react-native-modal'
 import {
   StyleSheet,
   View,
   ScrollView,
   Image,
-  Dimensions
+  Dimensions,
+  Picker
 } from 'react-native';
 
 
@@ -23,12 +25,13 @@ export default class MenuPrincipalUI extends Component {
     this.state = {
       bandera: false,
       suscripcion: false,
-      Datos: []
+      Datos: [],
+      marcado: false
     };
   }
 
   componentWillMount() {
-    axios.get('http://8db7c9c8.ngrok.io/producto/index')
+    axios.get('http://25793a06.ngrok.io/producto/index')
       .then((response) => {
         this.setState({ Datos: response.data })
       })
@@ -41,6 +44,16 @@ export default class MenuPrincipalUI extends Component {
   }
   detalle(dato) {
     this.props.navigation.navigate('DetalleProducto', { itemID: dato });
+  }
+  Suscribirse() {
+    axios.post(`/api/solicitud/store`, {
+    })
+      .then((response) => {
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    this.setState({ yala: true })
   }
   render() {
     return (
@@ -74,6 +87,43 @@ export default class MenuPrincipalUI extends Component {
                 }
               </ScrollView>
             </View>
+
+            <Modal isVisible={this.state.marcado} backdropColor="white">
+              <Card style={{
+                height: 200,
+              }} >
+                <CardItem header bordered>
+                  <Text>Elija el tiempo de la Suscripcion </Text>
+
+                  <Button transparent onPress={() => this.setState({ marcado: false })}>
+                    <Icon name="md-close" active></Icon>
+                  </Button>
+
+                </CardItem>
+
+                <CardItem bordered>
+                  <Body>
+                    <Picker
+                      selectedValue={this.state.idProducto}
+                      style={{ height: 50, width: 300 }}
+                      onValueChange={(itemValue, itemIndex) => this.setState({ idProducto: itemValue })}>
+                      <Picker.Item label="1 Dia" value="1" />
+                      <Picker.Item label="1 Semana" value="2" />
+
+                      <Picker.Item label="2 Semanas " value="3" />
+                      <Picker.Item label="1 Mes" value="4" />
+
+                      <Picker.Item label="6 Meses " value="5" />
+                      <Picker.Item label="1 Año" value="6" />
+                      <Picker.Item label="Por siempre" value="6" />
+                    </Picker>
+                  </Body>
+                </CardItem>
+                <Button danger block onPress={() => this.Suscribirse()}>
+                  <Text>Guardar Suscripcion</Text>
+                </Button>
+              </Card>
+            </Modal>
             <View style={{ marginTop: 40, paddingHorizontal: 20 }}>
               <Text style={{ fontSize: 24, fontWeight: '700' }}>
                 Nuevos Productos Ofertados
@@ -91,7 +141,14 @@ export default class MenuPrincipalUI extends Component {
                         source={{ uri: dato.foto }}
                       />
                     </View>
+
+
                     <Card>
+                      <Right>
+                        <Button small danger onPress={() => this.setState({ marcado: !this.state.marcado })}>
+                          <Text>Suscribirse</Text>
+                        </Button>
+                      </Right>
                       <CardItem>
                         <Text style={{ fontWeight: '100', marginTop: 10, color: 'blue' }}>
                           Nombre : <Text>{dato.nombre}</Text>
@@ -99,13 +156,13 @@ export default class MenuPrincipalUI extends Component {
                       </CardItem>
                       <CardItem>
                         <Text style={{ fontWeight: '100', marginTop: 10, color: 'blue' }}>
-                          Precio: <Text>{dato.precio}</Text>
+                          Precio: <Text>{dato.precio} Bs.</Text>
                         </Text>
                       </CardItem>
                       <CardItem>
-                      <Text style={{ fontWeight: '100', marginTop: 10, color: 'blue' }}>
-                        Descripcion :  <Text>{dato.descripcion}</Text>
-                      </Text>
+                        <Text style={{ fontWeight: '100', marginTop: 10, color: 'blue' }}>
+                          Descripcion :  <Text>{dato.descripcion}</Text>
+                        </Text>
                       </CardItem>
                     </Card>
                   </View>
@@ -122,7 +179,7 @@ export default class MenuPrincipalUI extends Component {
         <Footer>
           <FooterTab>
             <Button>
-              <Text>Reservas</Text>
+              <Text onPress={() => this.props.navigation.navigate('ReservasUI')} > Reservas</Text>
             </Button >
             <Button active={this.state.suscripcion} onPress={() => this.setState({ suscripcion: !this.state.suscripcion })}>
               <Text>Suscripcion</Text>
@@ -130,6 +187,10 @@ export default class MenuPrincipalUI extends Component {
             <Button active={this.state.bandera} onPress={() => this.buscar()} badge vertical >
               <Badge ><Text>51</Text></Badge>
               <Text>Buscar</Text>
+            </Button>
+            <Button onPress={() => this.buscar()} badge vertical >
+              <Badge ><Text>1</Text></Badge>
+              <Text>Perfil</Text>
             </Button>
           </FooterTab>
         </Footer>
