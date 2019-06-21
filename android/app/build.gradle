@@ -138,6 +138,8 @@ android {
 }
 
 dependencies {
+    implementation project(':@react-native-community_async-storage')
+    implementation project(':react-native-firebase')
     implementation project(':react-native-gesture-handler')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
@@ -145,7 +147,14 @@ dependencies {
 
     // react-native-maps install
       implementation project(':react-native-maps')
+
+      ///FIRE BASE PARA QUE FUNCIONE
+    implementation "com.google.android.gms:play-services-base:15.0.0"
+    implementation "com.google.firebase:firebase-core:16.0.9"
+    implementation 'com.google.firebase:firebase-messaging:17.6.0'
 }
+
+apply plugin: 'com.google.gms.google-services'
 
 // Run this once to be able to run the application with BUCK
 // puts all compile dependencies into folder libs for BUCK to use

@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import {  Button, Text, Card, CardItem, Body, } from 'native-base';
+import { Button, Text, Card, CardItem, Body, } from 'native-base';
 import {
   StyleSheet,
   View,
   TextInput,
   CheckBox,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
-
+import Url from './url';
+import firebase from "react-native-firebase";
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class LoginUI extends Component {
 
@@ -37,7 +40,8 @@ export default class LoginUI extends Component {
     this.state = {
       username: '',
       password: '',
-      rememberMe: false
+      rememberMe: false,
+      token:"",
     };
   }
 
@@ -52,9 +56,12 @@ export default class LoginUI extends Component {
           <Text style={styles.welcome}>Bienvenido a ReserveIt!</Text>
           <Text style={styles.welcome}>Inicio de Sesión</Text>
           <CardItem>
-            <Body>
-              <Text>Para gozar de la funcionalidad de esta aplicación, primero debe iniciar sesión.</Text>
-            </Body>
+          <View style={styles.Imagen} >
+              <Image
+                style={{ height: 150, width: 100, resizeMode: "stretch" }}
+                source={require('../Imagenes/oficial3.png')}
+              />
+            </View>
           </CardItem>
           <CardItem>
             <TextInput
@@ -81,37 +88,37 @@ export default class LoginUI extends Component {
 
           <CardItem>
             <Body>
-            <View style={styles.horizontalContainer}>
-              <CheckBox
-                value={this.state.rememberMe}
-                onValueChange={(newValue) => { this.props.value = newValue }} />
-              <Text>Recordarme</Text>
-            </View>
+              <View style={styles.horizontalContainer}>
+                <CheckBox
+                  value={this.state.rememberMe}
+                  onValueChange={(newValue) => { this.props.value = newValue }} />
+                <Text>Recordarme</Text>
+              </View>
             </Body>
-          </CardItem>
-          
-          <CardItem>
-          <Body>
-          <Button  block success onPress={() => {   this.props.navigation.navigate('MenuUsuarioUI')        /*this.iniciarSesion()*/ }}>
-              <Text>Iniciar Sesión</Text>
-            </Button>
-          </Body>
           </CardItem>
 
           <CardItem>
             <Body>
-            <Button  block success onPress={() => { this.props.navigation.navigate('registrarse') }}>
-              <Text>Registra Nuevo</Text>
-            </Button>
+              <Button block success onPress={() => { this.iniciarSesion() }}>
+                <Text>Iniciar Sesión</Text>
+              </Button>
+            </Body>
+          </CardItem>
+
+          <CardItem>
+            <Body>
+              <Button block success onPress={() => { this.props.navigation.navigate('registrarse') }}>
+                <Text>Registra Nuevo</Text>
+              </Button>
             </Body>
           </CardItem>
 
 
           <CardItem>
             <Body>
-            <Button  block success onPress={() => { this.props.navigation.navigate('PwResetRequestUI') }}>
-              <Text>Olvidé mi contraseña</Text>
-            </Button>
+              <Button block success onPress={() => { this.props.navigation.navigate('PwResetRequestUI') }}>
+                <Text>Olvidé mi contraseña</Text>
+              </Button>
             </Body>
           </CardItem>
 
@@ -120,21 +127,54 @@ export default class LoginUI extends Component {
     );
   } /* end of render() method */
 
+  async checkPermission() {
+    const enabled = await firebase.messaging().hasPermission();
+    if (enabled) {
+      this.getToken();
+    } else {
+      this.requestPermission();
+    }
+  }
+  async getToken() {
+    let fcmToken = await AsyncStorage.getItem("fcmToken");
+    if (!fcmToken) {
+      fcmToken = await firebase.messaging().getToken();
+      this.setState({token:fcmToken});
+      if (fcmToken) {
+        // user has a device token
+        await AsyncStorage.setItem("fcmToken", fcmToken);
+      }
+    }
+  }
+  async requestPermission() {
+    try {
+      await firebase.messaging().requestPermission();
+      // User has authorised
+      this.getToken();
+    } catch (error) {
+      // User has rejected permissions
+      console.log("permission rejected");
+    }
+  }
+  componentDidMount(){
+    this.checkPermission();
 
+  }
   /**
    * Autentica al usuario actual con el servidor.
    * En caso de que el usuario que está iniciando sesión no sea de tipo "cliente",
    * se debería mostrar un error.
    */
   iniciarSesion() {
-    axios.post('http://192.168.0.107:8000/api/loginu', {
+    console.warn(this.state.token)
+    axios.post(Url + 'loginu', {
       username: this.state.username,
-      password: this.state.password
+      password: this.state.password,
+      token:this.state.token
     })
-      .then( (response) =>{
-        if(response.data!=0){
-          console.warn("Hola");
-         this.props.navigation.navigate('MenuUsuarioUI');
+      .then((response) => {
+        if (response.data.cliente_id != 0) {
+          this.props.navigation.navigate('MenuUsuarioUI', { itemID: response.data });
         }
       })
       .catch(function (error) {
@@ -181,7 +221,13 @@ const styles = StyleSheet.create({
   welcome: {
     fontSize: 20,
     textAlign: 'center',
-    margin: 10,
+  },
+  Imagen:{
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height:100
+
   },
   textInput: {
     borderWidth: 1,

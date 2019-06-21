@@ -8,8 +8,10 @@ import {
   CheckBox,
   Alert
 } from 'react-native';
-
-
+import { Container, Header, Content, Tab, Tabs } from 'native-base';
+import ListarEmpresas from './ListarSuscripcionEmpresa';
+import ListarProducto from './ListarSuscripcionProducto';
+import ListarSucursal from './ListarSuscripcionSucursal';
 
 export default class SuscripcionesUI extends Component {
 
@@ -23,23 +25,37 @@ export default class SuscripcionesUI extends Component {
 
     // establecimiento del estado inicial del componente
     this.state = {
+       Id:0
     };
   }
 
-  /**
-   * Renderización del componente vía JSX
-   */
+   componentWillMount(){
+    const { navigation } = this.props;
+    const id = navigation.getParam('idCliente');
+    this.setState({Id:id});
+   }
+
+
   render() {
     // JSX va aquí :D
     return (
-      <View style={styles.container}>
-        <Text>----------</Text>
-        <Text style={styles.welcome}>Suscripciones</Text>
-        <Text>----------</Text>
-      </View>
+      <Container>
+        <Tabs >
+          <Tab heading="Empresas">
+            <ListarEmpresas idCliente={this.state.Id} />
+          </Tab>
+          <Tab heading="Sucursal">
+          <ListarSucursal idCliente={this.state.Id} />
+          </Tab>
+          <Tab heading="Productos">
+            <ListarProducto idCliente={this.state.Id} />
+
+          </Tab>
+        </Tabs>
+      </Container>
     );
   }
-  
+
 } /* end of SuscripcionesUI class */
 
 

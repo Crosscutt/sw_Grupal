@@ -3,7 +3,8 @@ import {
   StyleSheet,
   Text,
   View,
-  Button
+  Button,
+  Image
 } from 'react-native';
 
 
@@ -28,19 +29,19 @@ export default class WelcomeUI extends Component {
     // JSX va aquí :D
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>ReserveIt</Text>
-        <Text>----------</Text>
+        <Text style={styles.welcome}>Bienvenido</Text>
         <Text>"Salvando alimentos, un plato a la vez."</Text>
-        <Text>----------</Text>
-        <Text>¡Bienvenido!</Text>
-        <Text>----------</Text>
+        <Image
+          style={{ height: 250, width: 210,resizeMode:"stretch"}}
+          source={require('../Imagenes/oficial.png')}
+        />
+        <Image />
         <Button
           title='Iniciar Sesión'
           onPress={() => {
             this.props.navigation.navigate('LoginUI');
           }}
         />
-        <Text>----------</Text>
       </View>
     );
   }
@@ -53,12 +54,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FCFCFC',
+    backgroundColor: '#F7F2E0',
   },
   welcome: {
-    fontSize: 20,
+    fontSize: 30,
     textAlign: 'center',
     margin: 10,
+    fontWeight: "bold"
   },
   instructions: {
     textAlign: 'center',

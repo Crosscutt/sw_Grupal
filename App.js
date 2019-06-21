@@ -60,6 +60,9 @@ const navRouteMap = {
   LoginUI: {
     screen: LoginUI,
   },
+  VerPerfilUsuarioUI:{
+    screen:VerPerfilUsuarioUI
+  },
   MenuUsuarioUI: {
     screen: MenuPrincipalUI
   },

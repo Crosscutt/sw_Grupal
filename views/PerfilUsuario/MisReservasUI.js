@@ -1,95 +1,84 @@
-import React, { Component } from 'react'
-import { Text, View, StyleSheet, FlatList, Dimensions, Image, TouchableHighlight } from 'react-native'
-import axios from 'axios'
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TextInput,
+  CheckBox,
+  Alert
+} from 'react-native';
+import { Container, Header, Content, Tab, Tabs } from 'native-base';
+import HistorialReserva from './HistorialReservas';
+import ReservasDia from './ReservaPendiente';
 
+export default class SuscripcionesUI extends Component {
 
-export default class Historial extends Component {
+  static navigationOptions = {
+    title: 'Suscripciones'
+  }
 
   constructor(props) {
     super(props);
+
     this.state = {
-      data: [],
-      gender: "",
-      isFetching: false,
-    }
+      Id:""
+    };
   }
 
-  componentWillMount() {
-
-    this.cargar();
+  componentWillMount(){
+    const { navigation } = this.props;
+    const id = navigation.getParam('idCliente');
+    this.setState({Id:id});
   }
-
-  onRefresh() {
-    this.setState({ isFetching: true }, function () { this.cargar() });
-  }
-
-  cargar() {
-    axios.get('http://25793a06.ngrok.io/api/reserva/create')
-      .then(response => {
-        this.setState({ data: response.data, isFetching: false })
-      });
-
-  }
-
   render() {
     return (
-      <View style={styles.container}>
-        <TouchableHighlight
-          onPressOut={this.searchRandomUser}
-          style={{ width: deviceWidth - 32, height: 45, backgroundColor: 'red', justifyContent: "center", alignContent: "center" }}>
-          <Text style={{ fontSize: 22, color: 'white', fontWeight: 'bold', textAlign: "center" }}>Reload Data</Text>
-        </TouchableHighlight>
-        <FlatList
-          data={this.state.data}
-          onRefresh={() => this.onRefresh()}
-          refreshing={this.state.isFetching}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) =>
-            <View style={styles.ContainerView}>
-              <View>
-                <Image
-                  source={{ uri: '' }}
-                  style={{ height: 100, width: 100, borderRadius: 50, marginLeft: 4 }}
-                  resizeMode='contain'
-                />
-              </View>
-              <View style={{ flexDirection: 'column', marginLeft: 16, marginRight: 16, flexWrap: 'wrap', alignSelf: "center", width: deviceWidth - 160 }}>
-                <Text>Email Id : {item.Monto_Total}</Text>
-
-                <Text>Date of birth : {item.Cantidad}</Text>
-                <Text>Phone number : {item.id}</Text>
-
-              </View>
-
-            </View>
-          }
-        />
-      </View>
-    )
+      <Container>
+        <Tabs >
+        <Tab heading="Hoy">
+            <ReservasDia idCliente={this.state.Id}/>
+          </Tab>
+          <Tab heading="Historial">
+            <HistorialReserva idCliente={this.state.Id} />
+          </Tab>
+ 
+        </Tabs>
+      </Container>
+    );
   }
-}
-const deviceWidth = Dimensions.get('window').width
-const deviceHeight = Dimensions.get('window').height
+  
+} 
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    flexDirection: 'column',
     justifyContent: 'center',
-    marginTop: 22
+    alignItems: 'center',
+    backgroundColor: '#FCFCFC'
   },
-  ContainerView:
-  {
-    // backgroundColor:'grey',
-    marginBottom: 1,
-    paddingVertical: 10,
-    backgroundColor: '#F5F5F5',
-
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'grey',
-    width: deviceWidth - 40,
-    marginLeft: 20,
-    marginRight: 20,
-    marginTop: 1,
-    flexDirection: 'row'
+  horizontalContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    backgroundColor: '#FCFCFC'
+  },
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: 'silver',
+    borderRadius: 3,
+    height: 40,
+    width: '75%'
+  },
+  buttons: {
+    width: '75%'
   }
 });

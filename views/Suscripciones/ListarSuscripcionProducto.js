@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { Text, View, StyleSheet, FlatList, Dimensions, Image, TouchableHighlight } from 'react-native'
 import axios from 'axios'
+import Url from '../url';
 
-
-export default class ListarSucursalesUI extends Component {
+export default class ListarProducto extends Component {
 
   constructor(props) {
     super(props);
@@ -11,33 +11,27 @@ export default class ListarSucursalesUI extends Component {
       data: [],
       gender: "",
       isFetching: false,
-      idEmpresa: ""
     }
   }
-  static navigationOptions = {
-    title: 'Lista de Sucursales'
-  }
+
   componentWillMount() {
-    const { navigation } = this.props;
-    const itemID = navigation.getParam('itemID');
-    this.cargar(itemID);
+
+    this.cargar();
   }
 
   onRefresh() {
     this.setState({ isFetching: true }, function () { this.cargar() });
   }
 
-  cargar(itemID) {
-    axios.get('http://192.168.0.107:8000/api/office/' + itemID)
+  cargar() {
+    const cliente=this.props.idCliente;
+    axios.get(Url+'producto/'+cliente)
       .then(response => {
         this.setState({ data: response.data, isFetching: false })
       });
 
   }
 
-  VerProductos(idSucursal) {
-    this.props.navigation.navigate('VerCatalogoCompletoUI', { ItemID: idSucursal });
-  }
   render() {
     return (
       <View style={styles.container}>
@@ -47,22 +41,16 @@ export default class ListarSucursalesUI extends Component {
           refreshing={this.state.isFetching}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) =>
-            <View style={styles.ContainerView} >
+            <View style={styles.ContainerView}>
               <View>
                 <Image
                   source={{ uri: item.foto }}
                   style={{ height: 100, width: 100, borderRadius: 50, marginLeft: 4 }}
                   resizeMode='contain'
-                  onTouchStart={() => this.VerProductos(item.sucursal_id)}
-
                 />
               </View>
               <View style={{ flexDirection: 'column', marginLeft: 16, marginRight: 16, flexWrap: 'wrap', alignSelf: "center", width: deviceWidth - 160 }}>
-                <Text>Nombre de la sucursal: {item.nombre}</Text>
-
-                <Text>Ubucacion : {item.direccion}</Text>
-                <Text>Telefono : {item.telefono}</Text>
-
+                <Text>Nombre : {item.nombre}</Text>
               </View>
 
             </View>

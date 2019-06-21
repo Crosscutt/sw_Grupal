@@ -3,6 +3,10 @@ package com.reserveit;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
+import io.invertase.firebase.RNFirebasePackage;
+import io.invertase.firebase.messaging.RNFirebaseMessagingPackage;                       
+import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -26,8 +30,12 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new AsyncStoragePackage(),
+            new RNFirebasePackage(),
             new RNGestureHandlerPackage(),
-          new MapsPackage() // react-native-maps install 2
+            new RNFirebaseMessagingPackage(),
+            new RNFirebaseNotificationsPackage(),
+            new MapsPackage() // react-native-maps install 2
       );
     }
 

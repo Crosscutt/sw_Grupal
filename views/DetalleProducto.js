@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { Container, Header, Content, Card, CardItem, Text, Button, Left, Body, Right, Icon } from 'native-base';
 import axios from 'axios'
+import Url from './url';
 const styles = StyleSheet.create({
   imagen: {
     width: '100%',
@@ -24,7 +25,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   }
 });
-const pv = 5;
 
 export default class DetalleProducto extends Component {
   static navigationOptions = {
@@ -38,35 +38,44 @@ export default class DetalleProducto extends Component {
       Foto: "",
       Precio: 0,
       Cantidad: 0,
-      Total: 0
+      Disponible:0,
+      Total: 0,
+      Foto_Empresa:"",
+      Eslogan:"",
+      Nombre_Empresa:"",
+      IdOferta:0,
+      idCliente:0
     }
   }
 
   componentWillMount() {
     const { navigation } = this.props;
     const itemID = navigation.getParam('itemID');
-    this.setState({ Nombre: itemID.nombre, Descripcion: itemID.descripcion, Foto: itemID.foto, Precio: itemID.precio })
+    const id=navigation.getParam('idCliente');
+    const Company=navigation.getParam('Company');
+    this.setState({ Nombre: itemID.nombre, Descripcion: itemID.descripcion, Foto: itemID.foto_producto, Precio: itemID.precio,Foto_Empresa:Company.foto_empresa,Nombre_Empresa:Company.empresa,Eslogan:Company.slogan,Disponible:itemID.cantidad,IdOferta:itemID.id_oferta,idCliente:id})
   }
 
   contador(cant) {
     if (cant == 0) {
       const c = this.state.Cantidad + 1;
-      this.setState({ Cantidad: this.state.Cantidad + 1, Total: c * pv })
+      if(this.state.Disponible!=0){
+        this.setState({ Cantidad: this.state.Cantidad + 1, Total: c * this.state.Precio ,Disponible:this.state.Disponible-1})
+      }
     } else {
       if (this.state.Cantidad != 0) {
-        this.setState({ Cantidad: this.state.Cantidad - 1, Total: this.state.Total - pv })
+        this.setState({ Cantidad: this.state.Cantidad - 1, Total: this.state.Total - this.state.Precio,Disponible:this.state.Disponible+1 })
       }
     }
 
   }
 
   Reservar(){
-    axios.post(`http://25793a06.ngrok.io/api/reserva/create`, {
-      idCliente:1,
-      idSucursal:2,
-      Monto:this.state.Total,
-      Cantidad:this.state.Cantidad,
-      producto:1
+    axios.post(Url+'reserve', {
+      idCliente:this.state.idCliente,
+      monto_total:this.state.Total,
+      cantidad:this.state.Cantidad,
+      idOferta:this.state.IdOferta
     })
     .then((response)=> {
       console.warn(response.data)
@@ -83,10 +92,10 @@ export default class DetalleProducto extends Component {
           <Card >
             <CardItem >
               <Left>
-                <Image style={styles.imagen_logo} source={{ uri: 'https:\/\/upload.wikimedia.org\/wikipedia\/commons\/thumb\/3\/3a\/Burger_King_Logo.svg\/1200px-Burger_King_Logo.svg.png' }} />
+                <Image style={styles.imagen_logo} source={{ uri: this.state.Foto_Empresa }} />
                 <Body>
-                  <Text>Nuevo producto</Text>
-                  <Text note>April 15, 2016</Text>
+                  <Text>{this.state.Nombre_Empresa}</Text>
+                  <Text note>{this.state.Eslogan}</Text>
                 </Body>
               </Left>
             </CardItem>
@@ -95,6 +104,7 @@ export default class DetalleProducto extends Component {
                 <Image style={styles.imagen} source={{ uri: this.state.Foto }} />
                 <Text> Descripcion del producto : {this.state.Descripcion}</Text>
                 <Text> Nombre del producto :  {this.state.Nombre}</Text>
+                <Text> Cantidad Disponible : {this.state.Disponible}     </Text>
                 <Text> Precio : {this.state.Precio} Bs.</Text>
 
                 <CardItem>

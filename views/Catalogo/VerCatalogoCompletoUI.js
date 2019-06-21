@@ -16,8 +16,7 @@ export default class VerCatalogoCompletoUI extends Component {
 
   componentWillMount() {
     const { navigation } = this.props;
-    const itemId = navigation.getParam('itemId', 'NO-ID');
-    console.warn(itemId)
+    const itemId = navigation.getParam('ItemID');
     this.cargar(itemId);
   }
 
@@ -38,50 +37,60 @@ export default class VerCatalogoCompletoUI extends Component {
 
   render() {
     return (
-<View>
+      <View style={styles.container}>
+      <FlatList
+        data={this.state.Datos}
+        onRefresh={() => this.onRefresh()}
+        refreshing={this.state.isFetching}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) =>
+          <View style={styles.ContainerView} >
+            <View>
+              <Image
+                source={{ uri: item.ruta_foto }}
+                style={{ height: 100, width: 100, borderRadius: 50, marginLeft: 4 }}
+                resizeMode='contain'
+                onTouchStart={() => this.VerProductos(item.sucursal_id)}
 
-<ScrollView
-    scrollEventThrottle={16}
->
-    <View style={{ flex: 1, backgroundColor: 'white', paddingTop: 20 }}>
-        <Text style={{ fontSize: 24, fontWeight: '700', paddingHorizontal: 20 }}>
-            Toby
-         </Text>
-        <View style={{ height: 130, marginTop: 20 }}>
-            <ScrollView
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-            >
-               {
-                  this.state.Datos.map(Dato=>{
-                    return(
-                      <View style={{ height: 130, width: 130, marginLeft: 20, borderWidth: 0.5, borderColor: '#ddddd' }} >
-                      <View style={{ flex: 2 }}>
-                          <Image
-                              source={{uri:Dato.ruta_logo}}
-                              style={{ flex: 1, width: null, height: null, resizeMode: 'cover' }}
-                          >
-                          </Image>
-                      </View>
-                      <View style={{ flex: 1, paddingLeft: 10, paddingTop: 10 }}>
-                          <Text>{Dato.nombre}</Text>
-                      </View>
-                     </View>
-                    )
+              />
+            </View>
+            <View style={{ flexDirection: 'column', marginLeft: 16, marginRight: 16, flexWrap: 'wrap', alignSelf: "center", width: deviceWidth - 160 }}>
+              <Text>Nombre del Producto : {item.nombre}</Text>
 
-                  })
+              <Text>Descripcion : {item.description}</Text>
 
-               }
+            </View>
 
-            </ScrollView>
-
-
-        </View>
-
-    </View>
-</ScrollView>
-
-</View>
-    )
+          </View>
+        }
+      />
+    </View>    )
   }
 }
+
+
+const deviceWidth = Dimensions.get('window').width
+const deviceHeight = Dimensions.get('window').height
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 22
+  },
+  ContainerView:
+  {
+    // backgroundColor:'grey',
+    marginBottom: 1,
+    paddingVertical: 10,
+    backgroundColor: '#F5F5F5',
+
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'grey',
+    width: deviceWidth - 40,
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 1,
+    flexDirection: 'row'
+  }
+});
