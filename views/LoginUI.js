@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Container, Header, Content, Form, Item, Input, Label, Button, Text, Card, CardItem, Body, } from 'native-base';
+import {  Button, Text, Card, CardItem, Body, } from 'native-base';
 import {
   StyleSheet,
   View,
@@ -8,7 +8,6 @@ import {
   CheckBox,
   Alert
 } from 'react-native';
-import { StackActions,NavigationActions } from 'react-navigation';
 
 
 export default class LoginUI extends Component {
@@ -93,7 +92,7 @@ export default class LoginUI extends Component {
           
           <CardItem>
           <Body>
-          <Button  block success onPress={() => { this.iniciarSesion() }}>
+          <Button  block success onPress={() => {   this.props.navigation.navigate('MenuUsuarioUI')        /*this.iniciarSesion()*/ }}>
               <Text>Iniciar Sesión</Text>
             </Button>
           </Body>
@@ -135,7 +134,6 @@ export default class LoginUI extends Component {
       .then( (response) =>{
         if(response.data!=0){
           console.warn("Hola");
-         // this.props.navigation.dispatch(StackActions.reset({index:0,actions:[NavigationActions.navigate({routeName:'MenuUsuarioUI'})]}));
          this.props.navigation.navigate('MenuUsuarioUI');
         }
       })

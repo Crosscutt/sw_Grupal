@@ -44,7 +44,10 @@ import VerSucursalUI from './views/Catalogo/VerSucursalUI';
 import ListarSuscripcionesUI from './views/Suscripciones/ListarSuscripcionesUI';
 import NuevaSuscripcionUI from './views/Suscripciones/NuevaSuscripcionUI';
 import VerSuscripcionUI from './views/Suscripciones/VerSuscripcionUI';
- 
+
+//DETALLE PRODUCTO
+import DetalleProducto from './views/DetalleProducto';
+
 
 
 /*
@@ -74,7 +77,20 @@ const navRouteMap = {
   },
   registrarse:{
     screen: registrar
+  },
+  VerCatalogoCompletoUI:{
+    screen:VerCatalogoCompletoUI
+  },
+  ListarEmpresasUI:{
+    screen:ListarEmpresasUI
+  },
+  ListarSucursalesUI:{
+    screen:ListarSucursalesUI
+  },
+  DetalleProducto:{
+    screen:DetalleProducto
   }
+
 };
 
 const navOptions = {
